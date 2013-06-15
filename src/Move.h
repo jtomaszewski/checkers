@@ -10,17 +10,36 @@
 
 #include "../config.h"
 
+class Pawn;
 class Square;
 
 class Move {
 public:
-	unsigned int type;
 	Square *from, *to;
-	Move(Square *from, Square *to, int type);
-	bool canMove();
-	bool canKill();
+	list<Piece*> killed_pieces;
+
+	Move(Square *from, Square *to);
+	Move(Move* const);
+
+	/**
+	 * ruchy są podobne gdy mają to samo pole zaczynajace i docelowe
+	 * @param executeMove
+	 * @return
+	 */
 	bool operator==(const Move move);
+
+	/**
+	 * czy to jest ruch-bicie?
+	 * @return
+	 */
+	bool isKillingMove();
+
+	/**
+	 * czy to jest pojedyncze przesuniecie ?
+	 * @return
+	 */
+	bool isSingleStep();
 };
-typedef list<Move> Moves;
+typedef list<Move*> Moves;
 
 #endif /* MOVE_H_ */

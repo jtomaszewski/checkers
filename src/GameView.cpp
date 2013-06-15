@@ -34,25 +34,14 @@ void GameView::redraw() {
 void GameView::drawSquare(Square* square) {
 	float cx = GET_SQUARE_X(square->x), cy = GET_SQUARE_Y(square->y);
 
-	bool possible = false;
-	if (g->selected_square != NULL && g->selected_square->piece) {
-		Moves possible_moves = g->selected_square->piece->getPossibleMoves(g->board->squares);
-		FOREACH(i, possible_moves) {
-			if ((*i).to == square) {
-				possible = true;
-				break;
-			}
-		}
-	}
-
 	// square bg
 	al_draw_filled_rectangle(cx, cy, cx + SQUARE_WIDTH, cy + SQUARE_WIDTH,
-			square->selected ? COLOR_SQUARE_SELECTED : (possible ? COLOR_SQUARE_POSSIBLE : COLOR_SQUARE(square->x, square->y)));
+			square->selected ? COLOR_SQUARE_SELECTED : (square->possible ? COLOR_SQUARE_POSSIBLE : COLOR_SQUARE(square->x, square->y)));
 
 	// piece icon
 	if (square->piece) {
-		const string filename = string(PIECES_PATH)
-				+ PIECE_NAMES[square->piece->type] + to_string(
+		const string filename = string(IMAGES_PATH)
+				+ PIECE_TYPE_NAME[square->piece->type] + to_string(
 				(int) square->piece->player_id) + ".png";
 		ALLEGRO_BITMAP* image = al_load_bitmap(filename.c_str());
 		if (image == NULL) {

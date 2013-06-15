@@ -15,7 +15,7 @@ public:
 	Player();
 	virtual ~Player();
 
-	PLAYERS id;
+	PLAYER_ID id;
 };
 
 #include "HumanPlayer.h"

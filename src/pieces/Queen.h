@@ -8,11 +8,19 @@
 #ifndef QUEENPIECE_H_
 #define QUEENPIECE_H_
 
-#include "Piece.h"
+#include "Pawn.h"
 
-class Queen: public Piece {
+/**
+ * @see Pawn
+ */
+class Queen: public Pawn {
 public:
 	Queen();
+	Queen(Pawn* const);
+
+	Moves getPossibleStepMoves(Square **board);
+	Moves getPossibleKillMoves(Square **board);
+	Moves getPossibleKillMoves(Square **board, Move *move, pii jumped_from_offset);
 };
 
 #endif /* QUEENPIECE_H_ */

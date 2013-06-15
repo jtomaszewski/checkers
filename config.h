@@ -16,14 +16,17 @@
 #include <list>
 #include <algorithm>
 using namespace std;
-#define PB push_back
+
+typedef pair<int,int> pii;
 #define ALL(x) (x).begin(),(x).end()
 #define FOREACH(i,x) for( typeof((x).begin()) i=(x).begin(); (i)!=(x).end(); ++(i) )
 #define FOREACHD(i,x) for( typeof((x).rbegin()) i=(x).rbegin(); (i)!=(x).rend(); ++(i) )
+#define FOR(i,a,b) for( typeof(a) i=(a);(i)<(b);++(i))
+#define FORD(i,a,b) for( typeof(a) i=(a);(i)>=(b);--(i))
+#define REP(i,b) for( typeof(b) i=0;(i)<(b);++(i))
+#define REPD(i,b) for( typeof(b) i=(b);(i)>=0;--(i))
 
-#define PATH "/home/slimak/eclipse/checkers/"
-#define IMAGES_PATH PATH "images/"
-#define PIECES_PATH IMAGES_PATH "pieces/"
+#define IMAGES_PATH "images/"
 
 #define BOARD_COLS 8 // number of squares
 #define BOARD_SQUARES_SUM (BOARD_COLS*BOARD_COLS) // sum of all squares on board
@@ -39,10 +42,9 @@ using namespace std;
 #define COLOR_SQUARE_SELECTED al_map_rgb(200,60,60)
 #define COLOR_SQUARE_POSSIBLE al_map_rgb(150,150,60)
 
-enum PIECE_TYPES {NOTHING = 0, PAWN = 1, QUEEN};
-const string PIECE_NAMES[] = {"nothing", "pawn", "queen"};
-enum PLAYERS {PLAYER_NONE, PLAYER_TOP, PLAYER_BOTTOM};
-enum MOVES {MOVE = 1, KILL = 2};
+enum PIECE_TYPE {NOTHING, PAWN, QUEEN};
+const string PIECE_TYPE_NAME[] = {"nothing", "pawn", "queen"};
+enum PLAYER_ID {PLAYER_TOP = 1, PLAYER_BOTTOM};
 
 enum EVENT_TYPES {EVENT_NONE, EVENT_SQUARE_SELECT};
 struct EventResponse {
@@ -57,6 +59,8 @@ class Game;
 extern Game* g;
 class GameHandler;
 extern GameHandler* gh;
+class Pawn;
+typedef Pawn Piece; // Piece to pionek ogólnie. Nie było sensu jednak robić specjalnie podklasy, jest więc nim Pawn
 
 // useful macros
 #define BETWEEN(a,x,y) ((a) >= (x) && (a) <= (y))
@@ -73,6 +77,5 @@ extern GameHandler* gh;
 
 #define ARE_PIECES(s1,s2) (s1->piece && s2->piece)
 #define IS_ENEMY(s1,s2) (ARE_PIECES(s1,s2) && s1->piece->player_id != s2->piece->player_id)
-#define INSERT_SQUARE(v, x, y, board) (CORRECTXY(x, y) ? v.PB( board[SQUARE_XYTOI(x, y)] ), true : false)
 
 #endif /* CONFIG_H_ */

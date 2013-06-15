@@ -7,7 +7,7 @@
 
 #include "Board.h"
 
-PIECE_TYPES Board::DEFAULT_SETUP[] = {
+PIECE_TYPE Board::DEFAULT_SETUP[] = {
 		PAWN,    NOTHING, PAWN,    NOTHING, PAWN,    NOTHING, PAWN,    NOTHING,
 		NOTHING, PAWN,    NOTHING, PAWN,    NOTHING, PAWN,    NOTHING, PAWN,
 		PAWN,    NOTHING, PAWN,    NOTHING, PAWN,    NOTHING, PAWN,    NOTHING,
@@ -23,7 +23,8 @@ Board::Board() {
 }
 
 Board::~Board() {
-
+	for (int i = 0; i < BOARD_SQUARES_SUM; i++)
+		delete squares[i];
 }
 
 void Board::assignSquaresAndPieces() {
@@ -39,7 +40,7 @@ void Board::assignSquaresAndPieces() {
 	}
 }
 
-Piece *Board::createPiece(PIECE_TYPES type) {
+Piece *Board::createPiece(PIECE_TYPE type) {
 	switch (type) {
 	case NOTHING:
 		return NULL;

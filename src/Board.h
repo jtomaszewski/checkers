@@ -17,13 +17,13 @@ class Board;
 
 class Board {
 public:
-	static PIECE_TYPES DEFAULT_SETUP[];
+	static PIECE_TYPE DEFAULT_SETUP[];
 	Square* squares[BOARD_SQUARES_SUM];
 
 	Board();
 	virtual ~Board();
 	void assignSquaresAndPieces();
-	static Piece* createPiece(PIECE_TYPES type);
+	static Piece* createPiece(PIECE_TYPE type);
 };
 
 #endif /* BOARD_H_ */

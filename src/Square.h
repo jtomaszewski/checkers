@@ -11,17 +11,17 @@
 #include "../config.h"
 
 class Square;
-
 typedef list<Square*> Squares;
 
 #include "Move.h"
-#include "pieces/Piece.h"
+#include "pieces/Pawn.h"
 
 class Square {
 public:
 	Piece* piece = NULL;
 	int x, y;
-	bool selected = false;
+	bool selected = false, possible = false;
+
 	Square(const int i);
 	void setPiece(Piece* piece);
 	const char* c_str();

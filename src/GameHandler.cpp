@@ -94,21 +94,31 @@ bool GameHandler::triggerSelect(Square *square) {
 	}
 
 	if (g->selected_square == NULL) { // zaznaczamy od nowa
+		if (g->force_selected)
+			return false;
 		if (square->piece && square->piece->player_id == g->current_player->id) {
 			g->selectSquare(square);
 		} else
 			return false;
 	} else if (g->selected_square == square) { // zaznaczylismy biezacy - odznaczamy
+		if (g->force_selected)
+			return false;
 		g->selectSquare(NULL);
 	} else { // mamy juz swoj zaznaczony; zaznaczamy inny
 		if (square->piece && square->piece->player_id == g->current_player->id) { // zaznaczamy inny swoj
+			if (g->force_selected)
+				return false;
 			triggerSelect(NULL);
 			triggerSelect(square);
 		} else {
-			int move_type = IS_ENEMY(g->selected_square, square) ? KILL : MOVE;
-			Move move = Move(g->selected_square, square, move_type);
-			if (g->canMove(&move))
-				return g->move(&move);
+//			if (g->selected_square->possible) {
+//
+//			}
+			Move move = Move(g->selected_square, square);
+			Move *real_move = g->canMove(&move);
+			if (real_move)
+				return g->executeMove(real_move);
+
 			return false;
 		}
 	}

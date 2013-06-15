@@ -1,7 +1,6 @@
 #include "main.h"
 
 Game* g;
-
 GameHandler* gh;
 
 int main(int argc, char **argv) {
