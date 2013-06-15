@@ -1,4 +1,4 @@
 .cproject
 .settings/
 Debug/
-*.o
+**.o
