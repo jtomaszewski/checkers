@@ -8,29 +8,20 @@
 #include "Game.h"
 
 Game::Game() {
-	display = new Display();
 	board = new Board();
-
 	board->assignSquaresAndPieces();
-	assignPlayers();
 }
 
 Game::~Game() {
-	delete display;
 	delete board;
-	delete player1;
-	delete player2;
-	current_player = NULL;
 }
 
-void Game::assignPlayers() {
-	player1 = new HumanPlayer();
-	player1->id = PLAYER_TOP;
+void Game::assignPlayers(PLAYER_TYPE p1, PLAYER_TYPE p2) {
+	player1 = {PLAYER_TOP, p1};
+	player2 = {PLAYER_BOTTOM, p2};
 
-	player2 = new HumanPlayer();
-	player2->id = PLAYER_BOTTOM;
-
-	current_player = player2->id == PLAYER_BOTTOM ? player2 : player1;
+	current_player = &player1;
+	changeTurn();
 }
 
 void Game::selectSquare(Square *square) {
@@ -51,7 +42,9 @@ Moves Game::getAllPossibleMoves(PLAYER_ID player) {
 	for(int i=0; i<BOARD_SQUARES_SUM; i++) {
 		if (board->squares[i]->piece && board->squares[i]->piece->player_id == player) {
 			Moves moves2 = board->squares[i]->piece->getPossibleMoves(board->squares);
-			moves.splice(moves.begin(), moves2);
+			FOREACH (i, moves2)
+				if (!must_kill || (*i)->isKillingMove())
+					moves.push_back(*i);
 		}
 	}
 
@@ -59,6 +52,9 @@ Moves Game::getAllPossibleMoves(PLAYER_ID player) {
 }
 
 Move* Game::canMove(Move *move) {
+	if (!move->to->possible)
+		return NULL;
+
 	Moves available_moves = move->from->piece->getPossibleMoves(board->squares);
 	FOREACH (m, available_moves) {
 		Move *m1 = *m;
@@ -69,12 +65,12 @@ Move* Game::canMove(Move *move) {
 	return NULL;
 }
 
-bool Game::executeMove(Move *move) {
-	if (!move->to->possible)
-		return false;
-
+bool Game::executeMove(Move *move, bool emulate) {
 	FOREACH(i, move->killed_pieces) {
-		delete *&*i;
+		if (emulate)
+			(*i)->square->piece = NULL;
+		else
+			delete *&*i;
 	}
 
 	move->to->setPiece(move->from->piece);
@@ -84,7 +80,6 @@ bool Game::executeMove(Move *move) {
 		if (move->to->piece->canKill(board->squares)) { // jeśli z tego ruchu możemy wykonać jeszcze dalsze bicie, kontynuujemy ten ruch
 			selectSquare(move->to);
 			force_selected = true;
-			printf("dokończ ruch.\n");
 		} else { // w przeciwnym wypadku kończymy ruch
 			force_selected = false;
 		}
@@ -93,27 +88,94 @@ bool Game::executeMove(Move *move) {
 	if (!force_selected) {
 		tryQueenTransform(move->to->piece);
 		selectSquare(NULL);
-		changeTurn();
+		if (!emulate)
+			changeTurn();
 	}
 
 	return true;
 }
 
-bool Game::hasKillingMove(PLAYER_ID player_id) {
-	Moves moves = getAllPossibleMoves(player_id);
+bool Game::executeComputerMove() {
+	Moves moves = getAllPossibleMoves(current_player->id);
+	if (!moves.size())
+		return false;
 
-	FOREACH (i, moves) {
-		if ( (*i)->killed_pieces.size() ) {
-			return true;
+	int a_points = -666;
+	Move *a_move = NULL;
+	FOREACH(i, moves) {
+		Move *m = *i;
+		if (!m->full_move) continue;
+		bool wasqueen = m->from->piece->type == QUEEN;
+		Piece *from_piece = m->from->piece, *to_piece = m->to->piece;
+
+		int points = m->killed_pieces.size() * 2; // + pkt za kazdego zabitego wrogiego pionka
+
+		executeMove(m, true);
+		if (!wasqueen && m->to->piece->type == QUEEN) { // +pkt jesli zdobyl damke tym ruchem
+			points += 5;
+			new Piece(m->to->piece);
+		}
+
+		Move *km;
+		if (km = hasKillingMove(current_player == &player1 ? player2.id : player1.id)) // -pkt jesli wrog moze teraz zabic nam pionka
+			points -= km->killed_pieces.size() * 2;
+
+		FOREACH(kp, m->killed_pieces) {
+			Pawn *pawn = *kp;
+			pawn->square->piece = pawn;
+		}
+		m->from->setPiece(from_piece);
+		m->to->setPiece(to_piece);
+
+		points += (rand() % 100) > 80 ? 1 : 0; // troche losowosci
+
+		if (points >= a_points) {
+			a_points = points, a_move = m;
 		}
 	}
 
-	return false;
+	executeMove(a_move, false);
+
+	return true;
+}
+
+Move* Game::hasKillingMove(PLAYER_ID player) {
+	Moves moves = getAllPossibleMoves(player);
+
+	FOREACH (i, moves) {
+		if ( (*i)->killed_pieces.size() ) {
+			return *i;
+		}
+	}
+
+	return NULL;
+}
+
+list<Pawn*> Game::getPlayerPieces(PLAYER_ID player_id) {
+	list<Pawn*> pieces;
+	REP(i, BOARD_SQUARES_SUM) {
+		if (board->squares[i]->piece && board->squares[i]->piece->player_id == player_id)
+			pieces.push_back(board->squares[i]->piece);
+	}
+	return pieces;
 }
 
 void Game::changeTurn() {
-	current_player = current_player == player1 ? player2 : player1;
+	current_player = ENEMY_OF(current_player, this);
 	must_kill = hasKillingMove(current_player->id);
+
+	if (!getPlayerPieces(current_player->id).size()) {
+		printf("Brak pionkow! Przegrywasz!\n");
+		player_win = ENEMY_OF(current_player, this);
+		return;
+	}
+
+	if (!getAllPossibleMoves(current_player->id).size()) {
+		printf("Nie masz już żadnych ruchów! Niestety, przegrywasz.\n");
+		player_win = ENEMY_OF(current_player, this);
+		return;
+	}
+
 	if (must_kill)
 		printf("masz bicie! musisz zbić jednego z pionków wroga.\n");
 }
@@ -141,7 +203,7 @@ bool Game::tryQueenTransform(Pawn *pawn) {
 
 	if ((pawn->square->y == 0 && pawn->player_id == PLAYER_BOTTOM)
 			|| (pawn->square->y == BOARD_COLS-1 && pawn->player_id == PLAYER_TOP)) {
-		Queen *queen = new Queen(pawn);
+		new Queen(pawn);
 		return true;
 	}
 

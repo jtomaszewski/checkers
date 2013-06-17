@@ -36,23 +36,24 @@ typedef pair<int,int> pii;
 #define BOARD_OFFSET_Y BOARD_OFFSET
 #define BOARD_WIDTH (SQUARE_WIDTH*BOARD_COLS) // px
 
-#define COLOR_SQUARE1 al_map_rgb(0, 60, 20)
-#define COLOR_SQUARE2 al_map_rgb(0, 120, 60)
+#define COMPUTER_TURN_TIME 0.2 // jak dlugo ma myslec komputer?
+
+#define COLOR_SQUARE1 al_map_rgb(230, 208, 170)
+#define COLOR_SQUARE2 al_map_rgb(160, 125, 90)
 #define COLOR_SQUARE(x,y) (SQUARE_ODD(x, y) ? COLOR_SQUARE1 : COLOR_SQUARE2)
 #define COLOR_SQUARE_SELECTED al_map_rgb(200,60,60)
-#define COLOR_SQUARE_POSSIBLE al_map_rgb(150,150,60)
+#define COLOR_SQUARE_POSSIBLE al_map_rgb(230,170,60)
+#define COLOR_BLACK al_map_rgb(0,0,0) // "black won!"
+#define COLOR_BLACKA al_map_rgba(0,0,0,150)
+#define COLOR_WHITE al_map_rgb(255,255,255) // "white won!"
+#define COLOR_WHITEA al_map_rgba(255,255,255,150)
+#define COLOR_MENU_BG al_map_rgba(0,0,0,70)
+#define COLOR_MENU_SELECTED al_map_rgb(250,100,100)
+#define COLOR_MENU_TEXT COLOR_WHITE // napisy w menu
 
 enum PIECE_TYPE {NOTHING, PAWN, QUEEN};
 const string PIECE_TYPE_NAME[] = {"nothing", "pawn", "queen"};
-enum PLAYER_ID {PLAYER_TOP = 1, PLAYER_BOTTOM};
-
-enum EVENT_TYPES {EVENT_NONE, EVENT_SQUARE_SELECT};
-struct EventResponse {
-	EVENT_TYPES type = EVENT_NONE;
-	int i;
-	EventResponse() {};
-	EventResponse(EVENT_TYPES type, const int i = NULL): type(type), i(i) {}
-};
+#include "src/Player.h"
 
 // global variables
 class Game;
@@ -77,5 +78,7 @@ typedef Pawn Piece; // Piece to pionek ogólnie. Nie było sensu jednak robić s
 
 #define ARE_PIECES(s1,s2) (s1->piece && s2->piece)
 #define IS_ENEMY(s1,s2) (ARE_PIECES(s1,s2) && s1->piece->player_id != s2->piece->player_id)
+#define ENEMY_OF_ID(player_id) (player_id == PLAYER_TOP ? PLAYER_BOTTOM : PLAYER_TOP)
+#define ENEMY_OF(player, g) (player == &g->player1 ? &g->player2 : &g->player1)
 
 #endif /* CONFIG_H_ */

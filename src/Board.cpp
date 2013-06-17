@@ -18,10 +18,6 @@ PIECE_TYPE Board::DEFAULT_SETUP[] = {
 		NOTHING, PAWN,    NOTHING, PAWN,    NOTHING, PAWN,    NOTHING, PAWN,
 };
 
-Board::Board() {
-
-}
-
 Board::~Board() {
 	for (int i = 0; i < BOARD_SQUARES_SUM; i++)
 		delete squares[i];

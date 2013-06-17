@@ -17,6 +17,7 @@ class Move {
 public:
 	Square *from, *to;
 	list<Piece*> killed_pieces;
+	bool full_move = false; // czy to pełen ruch, czy podkombinacja?
 
 	Move(Square *from, Square *to);
 	Move(Move* const);

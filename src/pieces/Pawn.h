@@ -9,7 +9,6 @@
 #define PAWNPIECE_H_
 
 #include "../Square.h"
-#include "../Player.h"
 
 // próbuje dodać kwadrat do tablicy board, jeśli tylko miesci się w współrzędnych.
 #define INSERT_SQUARE(v, x, y, board) (CORRECTXY(x, y) ? v.push_back( board[SQUARE_XYTOI(x, y)] ), true : false)
@@ -19,8 +18,10 @@ public:
 	Square *square;
 	PLAYER_ID player_id;
 	PIECE_TYPE type;
+	bool killed = false; // @internal @see Queen::getPossibleKillMoves()
 
 	Pawn();
+	Pawn(Pawn* const);
 	virtual ~Pawn();
 
 	/**

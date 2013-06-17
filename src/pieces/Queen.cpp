@@ -30,7 +30,8 @@ Moves Queen::getPossibleStepMoves(Square** board) {
 			Square *sq = board[SQUARE_XYTOI(px,py)];
 			if (sq->piece)
 				break;
-			moves.push_back( new Move(square, sq) );
+			Move *move = new Move(square, sq);
+			moves.push_back(move), move->full_move = true;
 
 			px += ax, py += ay;
 		}
@@ -48,34 +49,43 @@ Moves Queen::getPossibleKillMoves(Square **board) {
 Moves Queen::getPossibleKillMoves(Square **board, Move *move, pii jumped_from_offset) {
 	Moves moves;
 
+	move->full_move = true;
 	pii offsets[] = { {1,1}, {1,-1}, {-1,-1}, {-1,1} };
 	REP(i, 4) { // dla każdego kierunku..
 		int ax = offsets[i].first, ay = offsets[i].second;
 		int px = square->x + ax, py = square->y + ay;
 
-		if (jumped_from_offset.first == ax && jumped_from_offset.second == ay)
+		if (jumped_from_offset.first == -ax && jumped_from_offset.second == -ay) // nie mozna skoczyc w ta i z powrotem
 			continue;
 
 		while (CORRECTXY(px, py)) { // .. powtarzamy aż natrafimy na wrogiego pionka
 			Square *enemy_square = board[SQUARE_XYTOI(px, py)];
-
-			if (enemy_square->piece && IS_ENEMY(enemy_square, move->from)) {
-				int jx = px + ax, jy = py + ay;
-				while (CORRECTXY(jx, jy)) { // .. i wskakujemy "za" niego w dowolne puste pole przed następnym pionkiem w linii
-					Square *jump_square = board[SQUARE_XYTOI(jx,jy)];
-					if (jump_square->piece)
-						break;
-
-					Move *move_copy = new Move(*move);
-					move_copy->killed_pieces.push_back(enemy_square->piece);
-					move_copy->to = jump_square;
-					moves.splice(moves.begin(), getPossibleKillMoves(board, move_copy, offsets[i]));
-
-					jx += ax, jy += ay;
-				}
+			if (!enemy_square->piece) {
+				px += ax, py += ay;
+				continue;
 			}
 
-			px += ax, py += ay;
+			if (!IS_ENEMY(enemy_square, move->from) || enemy_square->piece->killed)
+				break;
+
+			int jx = px + ax, jy = py + ay;
+			while (CORRECTXY(jx, jy)) { // .. i wskakujemy "za" niego w dowolne puste pole przed następnym pionkiem w linii
+				Square *jump_square = board[SQUARE_XYTOI(jx,jy)];
+				if (jump_square->piece)
+					break;
+
+				Move *move_copy = new Move(*move);
+				move_copy->killed_pieces.push_back(enemy_square->piece),
+						enemy_square->piece->killed = true,
+						move_copy->to = jump_square;
+				moves.splice(moves.begin(), getPossibleKillMoves(board, move_copy, offsets[i]));
+				if (moves.size() > 0)
+					move->full_move = false;
+				enemy_square->piece->killed = false;
+
+				jx += ax, jy += ay;
+			}
+			break;
 		}
 	}
 

@@ -23,6 +23,12 @@ public:
 	bool selected = false, possible = false;
 
 	Square(const int i);
+
+	/**
+	 * ustawia pionek na polu
+	 * @internal obustronnie ustawia wskaznik na polu i pionku
+	 * @param piece
+	 */
 	void setPiece(Piece* piece);
 	const char* c_str();
 };
