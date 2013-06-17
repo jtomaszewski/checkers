@@ -1,12 +1,12 @@
 Checkers in C++11
 
-Zalozenia:
-* maksymalna obiektowosc kodu - 
-* czytelnosc kodu
-* mozliwosc rozwiniecia kodu poprzez np. dodanie nowych figur, zmiana funkcji itd
-* DRY - dziedziczenie odpowiednich klas po sobie
+My assumptions while creating the game:
+* maximum clarity of the code
+* easy to maintain
+* DRY
 
 How to build:
-* wymagany linux, g++ z wersją c++11
-* `cd Release/; make all;`
-* uruchamiamy ./Release/checkers z poziomu ./
+* linux required
+* g++ with c++11 version and allegro5 libraries
+* compiling: `cd Release/; make all;`
+* running: run `./Release/checkers` while being in ./ directory
